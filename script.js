@@ -1,3 +1,6 @@
+let currentUser = "Austin";
+let employees = ["Austin", "Employee1", "Employee2"];
+
 function getRequests() {
     return JSON.parse(localStorage.getItem("requests")) || [];
 }
@@ -10,7 +13,7 @@ function requestTimeOff() {
     let requests = getRequests();
 
     let request = {
-        name: "Employee",
+        name: currentUser,
         status: "Pending"
     };
 
@@ -30,8 +33,9 @@ function displayRequests() {
 
     requests.forEach((req, index) => {
         container.innerHTML += `
-            <div>
+            <div style="margin-bottom:10px; padding:10px; border:1px solid #ccc;">
                 ${req.name} - ${req.status}
+                <br>
                 <button onclick="approve(${index})">Approve</button>
                 <button onclick="deny(${index})">Deny</button>
             </div>
@@ -93,7 +97,10 @@ function postAnnouncement() {
     if (!input) return;
 
     const message = input.value.trim();
-    if (message === "") return;
+    if (message === "") {
+        alert("Please type an announcement first.");
+        return;
+    }
 
     let announcements = getAnnouncements();
 
@@ -107,6 +114,7 @@ function postAnnouncement() {
     input.value = "";
 
     alert("Announcement posted!");
+    displayAnnouncements();
 }
 
 function markAsRead(index) {
@@ -116,70 +124,131 @@ function markAsRead(index) {
     displayAnnouncements();
 }
 
+function getNotices() {
+    return JSON.parse(localStorage.getItem("notices")) || [];
+}
+
+function saveNotices(notices) {
+    localStorage.setItem("notices", JSON.stringify(notices));
+}
+
+function displayNotices() {
+    const list = document.getElementById("noticesList");
+    if (!list) return;
+
+    let notices = getNotices();
+
+    list.innerHTML = "";
+
+    notices
+        .map((notice, originalIndex) => ({ notice, originalIndex }))
+        .filter(item => item.notice.employee === currentUser)
+        .forEach((item) => {
+            const n = item.notice;
+            const originalIndex = item.originalIndex;
+
+            list.innerHTML += `
+                <div class="notice">
+                    <strong>${n.date}</strong><br>
+                    ${n.message}
+                    <br><br>
+                    ${
+                        n.acknowledgedBy && n.acknowledgedBy.includes(currentUser)
+                            ? "<strong style='color:green;'>Acknowledged</strong>"
+                            : `<label>
+                                <input type="checkbox" onchange="acknowledgeNotice(${originalIndex})">
+                                I confirm that I have read, understand, and acknowledge this notice.
+                              </label>`
+                    }
+                </div>
+            `;
+        });
+}
+
+function acknowledgeNotice(originalIndex) {
+    let notices = getNotices();
+
+    if (!notices[originalIndex].acknowledgedBy) {
+        notices[originalIndex].acknowledgedBy = [];
+    }
+
+    if (!notices[originalIndex].acknowledgedBy.includes(currentUser)) {
+        notices[originalIndex].acknowledgedBy.push(currentUser);
+    }
+
+    saveNotices(notices);
+    displayNotices();
+    displayNoticeTracking();
+}
+
+function sendNotice() {
+    const input = document.getElementById("noticeInput");
+    const employeeSelect = document.getElementById("employeeSelect");
+
+    if (!input || !employeeSelect) return;
+
+    const message = input.value.trim();
+    const employee = employeeSelect.value;
+
+    if (message === "") {
+        alert("Please type a required notice first.");
+        return;
+    }
+
+    let notices = getNotices();
+
+    notices.unshift({
+        message: message,
+        date: new Date().toLocaleString(),
+        employee: employee,
+        acknowledgedBy: []
+    });
+
+    saveNotices(notices);
+    input.value = "";
+
+    alert("Required notice sent!");
+    displayNotices();
+    displayNoticeTracking();
+}
+
+function displayNoticeTracking() {
+    const container = document.getElementById("noticeTracking");
+    if (!container) return;
+
+    let notices = getNotices();
+
+    container.innerHTML = "";
+
+   notices.forEach((n) => {
+
+  let acknowledged = n.acknowledgedBy || [];
+
+  let notAcknowledged = employees.filter(emp => 
+    emp === n.employee && !acknowledged.includes(emp)
+  );
+
+  container.innerHTML += `
+    <div style="margin-bottom:15px; padding:10px; border:1px solid #ccc;">
+      <strong>${n.date}</strong><br>
+      ${n.message}<br><br>
+
+      <strong>Sent to:</strong> ${n.employee}<br>
+
+      <strong style="color:green;">Acknowledged:</strong> 
+      ${acknowledged.length ? acknowledged.join(", ") : "None"}<br>
+
+      <strong style="color:red;">Not Acknowledged:</strong> 
+      ${notAcknowledged.length ? notAcknowledged.join(", ") : "None"}
+    </div>
+  `;
+});
+}
+
+
 window.onload = function () {
     displayRequests();
     displayAnnouncements();
     displayNotices();
+    displayNoticeTracking();
 };
-
-function getNotices() {
-  return JSON.parse(localStorage.getItem("notices")) || [];
-}
-
-function saveNotices(notices) {
-  localStorage.setItem("notices", JSON.stringify(notices));
-}
-
-function displayNotices() {
-  const list = document.getElementById("noticesList");
-  if (!list) return;
-
-  let notices = getNotices();
-
-  list.innerHTML = "";
-
-  notices.forEach((n, index) => {
-    list.innerHTML += `
-      <div class="notice">
-        <strong>${n.date}</strong><br>
-        ${n.message}
-        <br><br>
-        ${
-          n.acknowledged
-            ? "<strong style='color:green;'>Acknowledged</strong>"
-            : `<label>
-                <input type="checkbox" onchange="acknowledgeNotice(${index})">
-                I confirm that I have read, understand, and acknowledge this notice.
-              </label>`
-        }
-      </div>
-    `;
-  });
-}
-
-function acknowledgeNotice(index) {
-  let notices = getNotices();
-  notices[index].acknowledged = true;
-  saveNotices(notices);
-  displayNotices();
-}
-function sendNotice() {
-  const input = document.getElementById("noticeInput");
-  if (!input) return;
-
-  const message = input.value.trim();
-  if (message === "") return;
-
-  let notices = getNotices();
-
-  notices.unshift({
-    message: message,
-    date: new Date().toLocaleString(),
-    acknowledged: false
-  });
-
-  saveNotices(notices);
-  input.value = "";
-
-  alert("Required notice sent!");
-}

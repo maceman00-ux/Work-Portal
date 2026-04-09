@@ -8,19 +8,29 @@
 </head>
 <body>
 
-    <h2>Post Announcement</h2>
-
-<textarea id="announcementInput" placeholder="Type announcement here"></textarea>
-<br>
-<h2>Send Required Notice</h2>
-
-<textarea id="noticeInput" placeholder="Type required notice here"></textarea>
-<br>
-<button onclick="sendNotice()">Send Required Notice</button>
-<button onclick="postAnnouncement()">Post Announcement</button>
-
     <h1>Manager Portal</h1>
+
+    <h2>Post Announcement</h2>
+    <textarea id="announcementInput" placeholder="Type announcement here"></textarea>
+    <br>
+    <button onclick="postAnnouncement()">Post Announcement</button>
+
+    <h2>Send Required Notice</h2>
+    <select id="employeeSelect">
+        <option value="Austin">Austin</option>
+        <option value="Employee1">Employee 1</option>
+        <option value="Employee2">Employee 2</option>
+    </select>
+    <br><br>
+    <textarea id="noticeInput" placeholder="Type required notice here"></textarea>
+    <br>
+    <button onclick="sendNotice()">Send Required Notice</button>
+
+    <h2>Time Off Requests</h2>
     <div id="requests"></div>
+
+    <h2>Notice Tracking</h2>
+    <div id="noticeTracking"></div>
 
     <script src="script.js"></script>
 </body>
