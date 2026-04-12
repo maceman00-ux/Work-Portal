@@ -1,5 +1,38 @@
-let currentUser = "Austin";
-let employees = ["Austin", "Employee1", "Employee2"];
+let currentUser = localStorage.getItem("currentUser") || "Austin";
+function changeUser() {
+    let select = document.getElementById("userSelect");
+    if (!select) return;
+
+    currentUser = select.value;
+    localStorage.setItem("currentUser", currentUser);
+
+    displayNotices();
+    displayAnnouncements();
+    displayMyRequests();
+
+    toggleManagerButton();
+}
+let managers = ["Austin"];
+function checkManagerAccess() {
+    if (!managers.includes(currentUser)) {
+        alert("Access denied. Manager only.");
+        window.location.href = "index.html";
+    }
+}
+function goToManager() {
+    window.location.href = "manager.html";
+}
+function toggleManagerButton() {
+    let btn = document.getElementById("managerBtn");
+    if (!btn) return;
+
+    if (managers.includes(currentUser)) {
+        btn.style.display = "inline-block";
+    } else {
+        btn.style.display = "none";
+    }
+}
+// -------------------- REQUESTS --------------------
 
 function getRequests() {
     return JSON.parse(localStorage.getItem("requests")) || [];
@@ -12,16 +45,38 @@ function saveRequests(requests) {
 function requestTimeOff() {
     let requests = getRequests();
 
+    let requestedDateInput = document.getElementById("requestDate");
+    let reasonInput = document.getElementById("requestReason");
+
+    let requestedDate = requestedDateInput ? requestedDateInput.value : "";
+    let reason = reasonInput ? reasonInput.value.trim() : "";
+
+    if (!requestedDate) {
+        alert("Please select a date.");
+        return;
+    }
+
     let request = {
         name: currentUser,
+        dateRequested: new Date().toLocaleString(),
+        requestedDate: requestedDate,
+        reason: reason || "No reason provided",
         status: "Pending"
     };
 
     requests.push(request);
     saveRequests(requests);
 
+    // Clear inputs
+    if (requestedDateInput) requestedDateInput.value = "";
+    if (reasonInput) reasonInput.value = "";
+
     alert("Request submitted!");
+    displayRequests();
+    displayRequestHistory();
+    displayMyRequests();
 }
+
 
 function displayRequests() {
     let container = document.getElementById("requests");
@@ -32,30 +87,83 @@ function displayRequests() {
     container.innerHTML = "";
 
     requests.forEach((req, index) => {
-        container.innerHTML += `
-            <div style="margin-bottom:10px; padding:10px; border:1px solid #ccc;">
-                ${req.name} - ${req.status}
-                <br>
-                <button onclick="approve(${index})">Approve</button>
-                <button onclick="deny(${index})">Deny</button>
-            </div>
-        `;
+        if (req.status === "Pending") {
+            container.innerHTML += `
+                <div style="margin-bottom:15px; padding:10px; border:1px solid #ccc;">
+                    <strong>Employee:</strong> ${req.name}<br>
+                    <strong>Date Requested:</strong> ${req.dateRequested || "Unknown"}<br>
+                    <strong>Requested Off Date:</strong> ${req.requestedDate || "Not entered"}<br>
+                    <strong>Reason:</strong> ${req.reason || "None"}<br>
+                    <strong>Status:</strong> ${req.status}<br><br>
+
+                    <button onclick="updateRequestStatus(${index}, 'Approved')">Approve</button>
+                    <button onclick="updateRequestStatus(${index}, 'Denied')">Deny</button>
+                </div>
+            `;
+        }
     });
+
+    if (container.innerHTML === "") {
+        container.innerHTML = "<p>No active requests.</p>";
+    }
 }
 
-function approve(index) {
+function displayRequestHistory() {
+    let container = document.getElementById("requestHistory");
+    if (!container) return;
+
     let requests = getRequests();
-    requests[index].status = "Approved";
-    saveRequests(requests);
-    displayRequests();
+
+    container.innerHTML = "";
+
+    requests.forEach((req, index) => {
+        if (req.status === "Approved" || req.status === "Denied") {
+            container.innerHTML += `
+                <div style="margin-bottom:15px; padding:10px; border:1px solid #ccc;">
+                    <strong>Employee:</strong> ${req.name}<br>
+                    <strong>Date Requested:</strong> ${req.dateRequested || "Unknown"}<br>
+                    <strong>Requested Off Date:</strong> ${req.requestedDate || "Not entered"}<br>
+                    <strong>Reason:</strong> ${req.reason || "None"}<br>
+                    <strong>Status:</strong> ${req.status}<br><br>
+
+                    <button onclick="updateRequestStatus(${index}, 'Pending')">Set Back to Pending</button>
+                    <button onclick="updateRequestStatus(${index}, 'Approved')">Approve</button>
+                    <button onclick="updateRequestStatus(${index}, 'Denied')">Deny</button>
+                </div>
+            `;
+        }
+    });
+
+    if (container.innerHTML === "") {
+        container.innerHTML = "<p>No request history.</p>";
+    }
 }
 
-function deny(index) {
+function updateRequestStatus(index, newStatus) {
     let requests = getRequests();
-    requests[index].status = "Denied";
+    requests[index].status = newStatus;
     saveRequests(requests);
     displayRequests();
+    displayRequestHistory();
 }
+
+function showRequestSection(section) {
+    const activeSection = document.getElementById("activeRequestsSection");
+    const historySection = document.getElementById("historyRequestsSection");
+
+    if (!activeSection || !historySection) return;
+
+    if (section === "active") {
+        activeSection.style.display = "block";
+        historySection.style.display = "none";
+    } else {
+        activeSection.style.display = "none";
+        historySection.style.display = "block";
+        displayRequestHistory();
+    }
+}
+
+// -------------------- ANNOUNCEMENTS --------------------
 
 function getAnnouncements() {
     return JSON.parse(localStorage.getItem("announcements")) || [];
@@ -124,6 +232,8 @@ function markAsRead(index) {
     displayAnnouncements();
 }
 
+// -------------------- NOTICES --------------------
+
 function getNotices() {
     return JSON.parse(localStorage.getItem("notices")) || [];
 }
@@ -179,6 +289,7 @@ function acknowledgeNotice(originalIndex) {
     saveNotices(notices);
     displayNotices();
     displayNoticeTracking();
+    displayNoticeHistory();
 }
 
 function sendNotice() {
@@ -210,6 +321,7 @@ function sendNotice() {
     alert("Required notice sent!");
     displayNotices();
     displayNoticeTracking();
+    displayNoticeHistory();
 }
 
 function displayNoticeTracking() {
@@ -220,35 +332,120 @@ function displayNoticeTracking() {
 
     container.innerHTML = "";
 
-   notices.forEach((n) => {
+    notices.forEach((n) => {
+        let acknowledged = n.acknowledgedBy || [];
+        let isFullyAcknowledged = acknowledged.includes(n.employee);
 
-  let acknowledged = n.acknowledgedBy || [];
+        if (!isFullyAcknowledged) {
+            container.innerHTML += `
+                <div style="margin-bottom:15px; padding:10px; border:1px solid #ccc;">
+                    <strong>${n.date}</strong><br>
+                    ${n.message}<br><br>
 
-  let notAcknowledged = employees.filter(emp => 
-    emp === n.employee && !acknowledged.includes(emp)
-  );
+                    <strong>Sent to:</strong> ${n.employee}<br>
 
-  container.innerHTML += `
-    <div style="margin-bottom:15px; padding:10px; border:1px solid #ccc;">
-      <strong>${n.date}</strong><br>
-      ${n.message}<br><br>
+                    <strong style="color:green;">Acknowledged:</strong> 
+                    ${acknowledged.length ? acknowledged.join(", ") : "None"}<br>
 
-      <strong>Sent to:</strong> ${n.employee}<br>
+                    <strong style="color:red;">Not Acknowledged:</strong> 
+                    ${!acknowledged.includes(n.employee) ? n.employee : "None"}
+                </div>
+            `;
+        }
+    });
 
-      <strong style="color:green;">Acknowledged:</strong> 
-      ${acknowledged.length ? acknowledged.join(", ") : "None"}<br>
-
-      <strong style="color:red;">Not Acknowledged:</strong> 
-      ${notAcknowledged.length ? notAcknowledged.join(", ") : "None"}
-    </div>
-  `;
-});
+    if (container.innerHTML === "") {
+        container.innerHTML = "<p>No active notices.</p>";
+    }
 }
 
+function displayNoticeHistory() {
+    const container = document.getElementById("noticeHistory");
+    if (!container) return;
+
+    let notices = getNotices();
+
+    container.innerHTML = "";
+
+    notices.forEach((n) => {
+        let acknowledged = n.acknowledgedBy || [];
+        let isFullyAcknowledged = acknowledged.includes(n.employee);
+
+        if (isFullyAcknowledged) {
+            container.innerHTML += `
+                <div style="margin-bottom:15px; padding:10px; border:1px solid #ccc;">
+                    <strong>${n.date}</strong><br>
+                    ${n.message}<br><br>
+
+                    <strong>Sent to:</strong> ${n.employee}<br>
+
+                    <strong style="color:green;">Acknowledged:</strong> 
+                    ${acknowledged.join(", ")}
+                </div>
+            `;
+        }
+    });
+
+    if (container.innerHTML === "") {
+        container.innerHTML = "<p>No notice history.</p>";
+    }
+}
+
+function showNoticeSection(section) {
+    const active = document.getElementById("activeNoticeSection");
+    const history = document.getElementById("historyNoticeSection");
+
+    if (!active || !history) return;
+
+    if (section === "active") {
+        active.style.display = "block";
+        history.style.display = "none";
+    } else {
+        active.style.display = "none";
+        history.style.display = "block";
+        displayNoticeHistory();
+    }
+}
+function displayMyRequests() {
+    let container = document.getElementById("myRequests");
+    if (!container) return;
+
+    let requests = getRequests();
+
+    container.innerHTML = "";
+
+    requests
+        .filter(r => r.name === currentUser)
+        .forEach((r) => {
+            container.innerHTML += `
+                <div style="margin-bottom:10px; padding:10px; border:1px solid #ccc;">
+                    <strong>Date Requested:</strong> ${r.dateRequested}<br>
+                    <strong>Requested Off Date:</strong> ${r.requestedDate}<br>
+                    <strong>Reason:</strong> ${r.reason}<br>
+                    <strong>Status:</strong> ${r.status}
+                </div>
+            `;
+        });
+
+    if (container.innerHTML === "") {
+        container.innerHTML = "<p>No requests submitted.</p>";
+    }
+}
+
+// -------------------- PAGE LOAD --------------------
 
 window.onload = function () {
+    let select = document.getElementById("userSelect");
+    if (select) {
+        select.value = currentUser;
+    }
+
     displayRequests();
+    displayRequestHistory();
     displayAnnouncements();
     displayNotices();
     displayNoticeTracking();
+    displayNoticeHistory();
+    displayMyRequests();
+    toggleManagerButton();
 };

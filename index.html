@@ -6,23 +6,45 @@
     <title>Employee Portal</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<h2>Select Employee</h2>
+<select id="userSelect" onchange="changeUser()">
+    <option value="Austin">Austin</option>
+    <option value="Employee1">Employee 1</option>
+    <option value="Employee2">Employee 2</option>
+</select>
 
+<button id="managerBtn" onclick="goToManager()" style="display:none; margin-top:10px;">
+    Go to Manager Portal
+</button>
+
+<br><br>
     <div id="announcements-widget">
-  <h2>
-    Announcements 
-    <span id="newCount" style="color:red;"></span>
-  </h2>
+        <h2>
+            Announcements
+            <span id="newCount" style="color:red;"></span>
+        </h2>
+        <div id="announcementList"></div>
+    </div>
 
-  <div id="announcementList"></div>
-</div>
-<div id="notices-section">
-  <h2>Required Notices</h2>
-  <div id="noticesList"></div>
-</div>
+    <div id="notices-section">
+        <h2>Required Notices</h2>
+        <div id="noticesList"></div>
+    </div>
 
     <h1>Employee Portal</h1>
-    <button onclick="requestTimeOff()">Request Time Off</button>
+
+    <h2>Request Time Off</h2>
+
+    <label>Date Off:</label><br>
+    <input type="date" id="requestDate"><br><br>
+
+    <label>Reason:</label><br>
+    <textarea id="requestReason"></textarea><br><br>
+
+    <button onclick="requestTimeOff()">Submit Request</button>
+
+    <h2>My Requests</h2>
+    <div id="myRequests"></div>
 
     <script src="script.js"></script>
 </body>
