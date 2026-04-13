@@ -1,4 +1,7 @@
 let currentUser = localStorage.getItem("currentUser") || "Austin";
+let employees = ["Austin", "Employee1", "Employee2"];
+let managers = ["Austin"];
+
 function changeUser() {
     let select = document.getElementById("userSelect");
     if (!select) return;
@@ -9,19 +12,13 @@ function changeUser() {
     displayNotices();
     displayAnnouncements();
     displayMyRequests();
-
     toggleManagerButton();
 }
-let managers = ["Austin"];
-function checkManagerAccess() {
-    if (!managers.includes(currentUser)) {
-        alert("Access denied. Manager only.");
-        window.location.href = "index.html";
-    }
-}
+
 function goToManager() {
     window.location.href = "manager.html";
 }
+
 function toggleManagerButton() {
     let btn = document.getElementById("managerBtn");
     if (!btn) return;
@@ -32,6 +29,14 @@ function toggleManagerButton() {
         btn.style.display = "none";
     }
 }
+
+function checkManagerAccess() {
+    if (!managers.includes(currentUser)) {
+        alert("Access denied. Manager only.");
+        window.location.href = "index.html";
+    }
+}
+
 // -------------------- REQUESTS --------------------
 
 function getRequests() {
@@ -67,7 +72,6 @@ function requestTimeOff() {
     requests.push(request);
     saveRequests(requests);
 
-    // Clear inputs
     if (requestedDateInput) requestedDateInput.value = "";
     if (reasonInput) reasonInput.value = "";
 
@@ -75,8 +79,8 @@ function requestTimeOff() {
     displayRequests();
     displayRequestHistory();
     displayMyRequests();
+    displayDashboardSummary();
 }
-
 
 function displayRequests() {
     let container = document.getElementById("requests");
@@ -145,6 +149,8 @@ function updateRequestStatus(index, newStatus) {
     saveRequests(requests);
     displayRequests();
     displayRequestHistory();
+    displayMyRequests();
+    displayDashboardSummary();
 }
 
 function showRequestSection(section) {
@@ -160,6 +166,32 @@ function showRequestSection(section) {
         activeSection.style.display = "none";
         historySection.style.display = "block";
         displayRequestHistory();
+    }
+}
+
+function displayMyRequests() {
+    let container = document.getElementById("myRequests");
+    if (!container) return;
+
+    let requests = getRequests();
+
+    container.innerHTML = "";
+
+    requests
+        .filter(r => r.name === currentUser)
+        .forEach((r) => {
+            container.innerHTML += `
+                <div style="margin-bottom:10px; padding:10px; border:1px solid #ccc;">
+                    <strong>Date Requested:</strong> ${r.dateRequested}<br>
+                    <strong>Requested Off Date:</strong> ${r.requestedDate}<br>
+                    <strong>Reason:</strong> ${r.reason}<br>
+                    <strong>Status:</strong> ${r.status}
+                </div>
+            `;
+        });
+
+    if (container.innerHTML === "") {
+        container.innerHTML = "<p>No requests submitted.</p>";
     }
 }
 
@@ -223,6 +255,7 @@ function postAnnouncement() {
 
     alert("Announcement posted!");
     displayAnnouncements();
+    displayDashboardSummary();
 }
 
 function markAsRead(index) {
@@ -230,6 +263,7 @@ function markAsRead(index) {
     announcements[index].read = true;
     saveAnnouncements(announcements);
     displayAnnouncements();
+    displayDashboardSummary();
 }
 
 // -------------------- NOTICES --------------------
@@ -290,6 +324,7 @@ function acknowledgeNotice(originalIndex) {
     displayNotices();
     displayNoticeTracking();
     displayNoticeHistory();
+    displayDashboardSummary();
 }
 
 function sendNotice() {
@@ -322,6 +357,7 @@ function sendNotice() {
     displayNotices();
     displayNoticeTracking();
     displayNoticeHistory();
+    displayDashboardSummary();
 }
 
 function displayNoticeTracking() {
@@ -406,30 +442,31 @@ function showNoticeSection(section) {
         displayNoticeHistory();
     }
 }
-function displayMyRequests() {
-    let container = document.getElementById("myRequests");
-    if (!container) return;
 
+// -------------------- DASHBOARD --------------------
+
+function displayDashboardSummary() {
     let requests = getRequests();
+    let notices = getNotices();
+    let announcements = getAnnouncements();
 
-    container.innerHTML = "";
+    let pendingRequests = requests.filter(r => r.status === "Pending").length;
+    let activeNotices = notices.filter(n => {
+        let acknowledged = n.acknowledgedBy || [];
+        return !acknowledged.includes(n.employee);
+    }).length;
+    let unreadAnnouncements = announcements.filter(a => !a.read).length;
 
-    requests
-        .filter(r => r.name === currentUser)
-        .forEach((r) => {
-            container.innerHTML += `
-                <div style="margin-bottom:10px; padding:10px; border:1px solid #ccc;">
-                    <strong>Date Requested:</strong> ${r.dateRequested}<br>
-                    <strong>Requested Off Date:</strong> ${r.requestedDate}<br>
-                    <strong>Reason:</strong> ${r.reason}<br>
-                    <strong>Status:</strong> ${r.status}
-                </div>
-            `;
-        });
+    let pendingEl = document.getElementById("pendingRequestsCount");
+    let noticesEl = document.getElementById("activeNoticesCount");
+    let announcementsEl = document.getElementById("unreadAnnouncementsCount");
 
-    if (container.innerHTML === "") {
-        container.innerHTML = "<p>No requests submitted.</p>";
-    }
+    if (pendingEl) pendingEl.innerText = pendingRequests;
+    if (noticesEl) noticesEl.innerText = activeNotices;
+    if (announcementsEl) announcementsEl.innerText = unreadAnnouncements;
+}
+function goToEmployee() {
+    window.location.href = "index.html";
 }
 
 // -------------------- PAGE LOAD --------------------
@@ -448,4 +485,5 @@ window.onload = function () {
     displayNoticeHistory();
     displayMyRequests();
     toggleManagerButton();
+    displayDashboardSummary();
 };

@@ -10,6 +10,26 @@
 
     <h1>Manager Portal</h1>
 
+    <div id="dashboardSummary" style="display:flex; gap:15px; margin-bottom:20px; flex-wrap:wrap;">
+        <div style="border:1px solid #ccc; padding:15px; min-width:180px;">
+            <h3>Pending Requests</h3>
+            <div id="pendingRequestsCount" style="font-size:28px; font-weight:bold; color:#b22222;">0</div>
+
+
+        <div style="border:1px solid #ccc; padding:15px; min-width:180px;">
+            <h3>Active Notices</h3>
+            <div id="activeNoticesCount" style="font-size:28px; font-weight:bold; color:#ff8c00;">0</div>
+
+
+        <div style="border:1px solid #ccc; padding:15px; min-width:180px;">
+            <h3>Unread Announcements</h3>
+            <div id="unreadAnnouncementsCount" style="font-size:28px; font-weight:bold; color:#1e90ff;">0</div>
+            
+    </div>
+    <button onclick="goToEmployee()" style="margin-bottom:15px;">
+    Back to Employee Portal
+</button>
+
     <h2>Post Announcement</h2>
     <textarea id="announcementInput" placeholder="Type announcement here"></textarea>
     <br>
@@ -26,121 +46,43 @@
     <br>
     <button onclick="sendNotice()">Send Required Notice</button>
 
-   <h2>Time Off Requests</h2>
+    <h2>Time Off Requests</h2>
 
-<div style="margin-bottom: 15px;">
-    <button onclick="showRequestSection('active')">Active Requests</button>
-    <button onclick="showRequestSection('history')">Request History</button>
-</div>
+    <div style="margin-bottom: 15px;">
+        <button onclick="showRequestSection('active')">Active Requests</button>
+        <button onclick="showRequestSection('history')">Request History</button>
+    </div>
 
-<div id="activeRequestsSection">
-    <h3>Active Requests</h3>
-    <div id="requests"></div>
-</div>
+    <div id="activeRequestsSection">
+        <h3>Active Requests</h3>
+        <div id="requests"></div>
+    </div>
 
-<div id="historyRequestsSection" style="display:none;">
-    <h3>Request History</h3>
-    <div id="requestHistory"></div>
-function displayNoticeTracking() {
-    const container = document.getElementById("noticeTracking");
-    if (!container) return;
+    <div id="historyRequestsSection" style="display:none;">
+        <h3>Request History</h3>
+        <div id="requestHistory"></div>
+    </div>
 
-    let notices = getNotices();
+    <h2>Notice Tracking</h2>
 
-    container.innerHTML = "";
+    <div style="margin-bottom: 15px;">
+        <button onclick="showNoticeSection('active')">Active Notices</button>
+        <button onclick="showNoticeSection('history')">Notice History</button>
+    </div>
 
-    notices.forEach((n) => {
-        let acknowledged = n.acknowledgedBy || [];
+    <div id="activeNoticeSection">
+        <h3>Active Notices</h3>
+        <div id="noticeTracking"></div>
+    </div>
 
-        let isFullyAcknowledged = acknowledged.includes(n.employee);
+    <div id="historyNoticeSection" style="display:none;">
+        <h3>Notice History</h3>
+        <div id="noticeHistory"></div>
+    </div>
 
-        if (!isFullyAcknowledged) {
-            container.innerHTML += `
-                <div style="margin-bottom:15px; padding:10px; border:1px solid #ccc;">
-                    <strong>${n.date}</strong><br>
-                    ${n.message}<br><br>
-
-                    <strong>Sent to:</strong> ${n.employee}<br>
-
-                    <strong style="color:green;">Acknowledged:</strong> 
-                    ${acknowledged.length ? acknowledged.join(", ") : "None"}<br>
-
-                    <strong style="color:red;">Not Acknowledged:</strong> 
-                    ${!acknowledged.includes(n.employee) ? n.employee : "None"}
-                </div>
-            `;
-        }
-    });
-
-    if (container.innerHTML === "") {
-        container.innerHTML = "<p>No active notices.</p>";
-    }
-}
-function displayNoticeHistory() {
-    const container = document.getElementById("noticeHistory");
-    if (!container) return;
-
-    let notices = getNotices();
-
-    container.innerHTML = "";
-
-    notices.forEach((n) => {
-        let acknowledged = n.acknowledgedBy || [];
-
-        let isFullyAcknowledged = acknowledged.includes(n.employee);
-
-        if (isFullyAcknowledged) {
-            container.innerHTML += `
-                <div style="margin-bottom:15px; padding:10px; border:1px solid #ccc;">
-                    <strong>${n.date}</strong><br>
-                    ${n.message}<br><br>
-
-                    <strong>Sent to:</strong> ${n.employee}<br>
-
-                    <strong style="color:green;">Acknowledged:</strong> 
-                    ${acknowledged.join(", ")}
-                </div>
-            `;
-        }
-    });
-
-    if (container.innerHTML === "") {
-        container.innerHTML = "<p>No notice history.</p>";
-    }
-}
-function showNoticeSection(section) {
-    const active = document.getElementById("activeNoticeSection");
-    const history = document.getElementById("historyNoticeSection");
-
-    if (!active || !history) return;
-
-    if (section === "active") {
-        active.style.display = "block";
-        history.style.display = "none";
-    } else {
-        active.style.display = "none";
-        history.style.display = "block";
-        displayNoticeHistory();
-    }
-}
-<div style="margin-bottom: 15px;">
-    <button onclick="showNoticeSection('active')">Active Notices</button>
-    <button onclick="showNoticeSection('history')">Notice History</button>
-</div>
-
-<div id="activeNoticeSection">
-    <h3>Active Notices</h3>
-    <div id="noticeTracking"></div>
-</div>
-
-<div id="historyNoticeSection" style="display:none;">
-    <h3>Notice History</h3>
-    <div id="noticeHistory"></div>
-</div>
-
-   <script src="script.js"></script>
-<script>
-    checkManagerAccess();
-</script>
+    <script src="script.js"></script>
+    <script>
+        checkManagerAccess();
+    </script>
 </body>
 </html>
