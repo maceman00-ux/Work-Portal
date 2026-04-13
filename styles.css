@@ -35,3 +35,131 @@ body {
   margin-bottom: 10px;
   font-size: 16px;
 }
+body.portal-page {
+    font-family: Arial, sans-serif;
+    background: #f7f7f9;
+    color: #222;
+    padding: 20px;
+}
+
+.dashboard-summary {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.dashboard-card {
+    background: white;
+    border: 1px solid #d8d8dd;
+    padding: 15px;
+    min-width: 180px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.clickable-card {
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.clickable-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.10);
+}
+
+.dashboard-count {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.requests-count {
+    color: #b22222;
+}
+
+.notices-count {
+    color: #ff8c00;
+}
+
+.announcements-count {
+    color: #1e90ff;
+}
+
+.toolbar-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+input[type="text"],
+select,
+textarea {
+    padding: 10px;
+    border: 1px solid #cfcfd6;
+    border-radius: 8px;
+}
+
+textarea {
+    min-width: 320px;
+    min-height: 90px;
+}
+
+button {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 8px;
+    background: #5a262b;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: 0.92;
+}
+
+.request-card,
+.announcement,
+.notice {
+    background: white;
+    border: 1px solid #d8d8dd;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.new-request-card {
+    border-left: 5px solid #b22222;
+    background: #fff8f8;
+}
+
+.new-alert-badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #b22222;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.card-title-row {
+    margin-bottom: 6px;
+}
+
+.status-pending {
+    color: #b22222;
+    font-weight: bold;
+}
+
+.status-approved {
+    color: #1e7e34;
+    font-weight: bold;
+}
+
+.status-denied {
+    color: #666;
+    font-weight: bold;
+}

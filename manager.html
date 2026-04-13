@@ -6,31 +6,32 @@
     <title>Manager Portal</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="portal-page">
 
     <h1>Manager Portal</h1>
 
-    <div id="dashboardSummary" style="display:flex; gap:15px; margin-bottom:20px; flex-wrap:wrap;">
-        <div style="border:1px solid #ccc; padding:15px; min-width:180px;">
-            <h3>Pending Requests</h3>
-            <div id="pendingRequestsCount" style="font-size:28px; font-weight:bold; color:#b22222;">0</div>
-
-
-        <div style="border:1px solid #ccc; padding:15px; min-width:180px;">
-            <h3>Active Notices</h3>
-            <div id="activeNoticesCount" style="font-size:28px; font-weight:bold; color:#ff8c00;">0</div>
-
-
-        <div style="border:1px solid #ccc; padding:15px; min-width:180px;">
-            <h3>Unread Announcements</h3>
-            <div id="unreadAnnouncementsCount" style="font-size:28px; font-weight:bold; color:#1e90ff;">0</div>
-            
-    </div>
     <button onclick="goToEmployee()" style="margin-bottom:15px;">
-    Back to Employee Portal
-</button>
+        Back to Employee Portal
+    </button>
 
-    <h2>Post Announcement</h2>
+    <div id="dashboardSummary" class="dashboard-summary">
+    <div onclick="applyDashboardFilter('pendingRequests')" class="dashboard-card clickable-card">
+        <h3>Pending Requests</h3>
+        <div id="pendingRequestsCount" class="dashboard-count requests-count">0</div>
+    </div>
+
+    <div onclick="applyDashboardFilter('activeNotices')" class="dashboard-card clickable-card">
+        <h3>Active Notices</h3>
+        <div id="activeNoticesCount" class="dashboard-count notices-count">0</div>
+    </div>
+
+    <div onclick="applyDashboardFilter('unreadAnnouncements')" class="dashboard-card clickable-card">
+        <h3>Unread Announcements</h3>
+        <div id="unreadAnnouncementsCount" class="dashboard-count announcements-count">0</div>
+    </div>
+</div>
+
+    <h2 id="announcementsSection">Post Announcement</h2>
     <textarea id="announcementInput" placeholder="Type announcement here"></textarea>
     <br>
     <button onclick="postAnnouncement()">Post Announcement</button>
@@ -48,10 +49,35 @@
 
     <h2>Time Off Requests</h2>
 
-    <div style="margin-bottom: 15px;">
+    <div class="toolbar-row">
         <button onclick="showRequestSection('active')">Active Requests</button>
         <button onclick="showRequestSection('history')">Request History</button>
     </div>
+
+    <div class="toolbar-row">
+    <input type="text" id="requestSearch" placeholder="Search by employee or reason" oninput="refreshManagerData()">
+
+    <select id="employeeFilter" onchange="refreshManagerData()">
+        <option value="all">All Employees</option>
+        <option value="Austin">Austin</option>
+        <option value="Employee1">Employee 1</option>
+        <option value="Employee2">Employee 2</option>
+    </select>
+
+    <select id="requestStatusFilter" onchange="refreshManagerData()">
+        <option value="all">All Statuses</option>
+        <option value="Pending">Pending</option>
+        <option value="Approved">Approved</option>
+        <option value="Denied">Denied</option>
+    </select>
+
+    <select id="requestSortOrder" onchange="refreshManagerData()">
+        <option value="newest">Newest First</option>
+        <option value="oldest">Oldest First</option>
+        <option value="dateOffSoonest">Date Off Soonest</option>
+        <option value="dateOffLatest">Date Off Latest</option>
+    </select>
+</div>
 
     <div id="activeRequestsSection">
         <h3>Active Requests</h3>
@@ -65,7 +91,7 @@
 
     <h2>Notice Tracking</h2>
 
-    <div style="margin-bottom: 15px;">
+    <div class="toolbar-row">
         <button onclick="showNoticeSection('active')">Active Notices</button>
         <button onclick="showNoticeSection('history')">Notice History</button>
     </div>
